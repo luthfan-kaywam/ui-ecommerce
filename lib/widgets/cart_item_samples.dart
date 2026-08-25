@@ -50,13 +50,12 @@ class _CartItemSamplesState extends State<CartItemSamples> {
               ),
               child: Row(
                 children: [
-                  Radio<bool>(
-                    value: true,
-                    groupValue: _selectedItems[i],
+                  Checkbox(
+                    value: _selectedItems[i] ?? true,
                     activeColor: const Color(0xFF4C53A5),
                     onChanged: (val) {
                       setState(() {
-                        _selectedItems[i] = !(_selectedItems[i] ?? false);
+                        _selectedItems[i] = val ?? false;
                       });
                     },
                   ),

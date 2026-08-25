@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'custom_image.dart';
+import 'favorite_button.dart';
 
 class ItemsWidget extends StatelessWidget {
   const ItemsWidget({super.key});
@@ -20,6 +22,13 @@ class ItemsWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -41,10 +50,7 @@ class ItemsWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Icon(
-                      Icons.favorite_border,
-                      color: Colors.red,
-                    ),
+                    const FavoriteButton(size: 20),
                   ],
                 ),
                 InkWell(
@@ -53,22 +59,11 @@ class ItemsWidget extends StatelessWidget {
                   },
                   child: Container(
                     margin: const EdgeInsets.all(10),
-                    child: Image.asset(
-                      'images/items/${i + 1}.jpg',
+                    child: CustomImage(
+                      imagePath: 'images/items/${i + 1}.jpg',
                       height: 100,
                       width: 100,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 100,
-                          width: 100,
-                          color: Colors.grey.shade200,
-                          child: const Icon(
-                            Icons.shopping_bag,
-                            size: 50,
-                            color: Color(0xFF4C53A5),
-                          ),
-                        );
-                      },
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),

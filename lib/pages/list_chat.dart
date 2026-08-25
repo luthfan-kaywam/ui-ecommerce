@@ -5,7 +5,7 @@ class ChatListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Data Dummy Chat
+    // Dummy Chat Data
     final List<Map<String, String>> chats = [
       {
         'name': 'Nike Official',
@@ -28,31 +28,31 @@ class ChatListPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7FF), 
+      backgroundColor: const Color(0xFFFDF7FF),
       appBar: AppBar(
         title: const Text(
-          'List Chat',
+          'Pesan & Chat',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 25,
+            fontSize: 22,
             color: Color(0xFF4C53A5),
           ),
         ),
         backgroundColor: Colors.white,
-        elevation: 0,
+        elevation: 1,
         iconTheme: const IconThemeData(color: Color(0xFF4C53A5)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, size: 28),
+            icon: const Icon(Icons.search, size: 26),
             onPressed: () {},
           ),
         ],
       ),
       body: Column(
         children: [
-          // Filter Button (Semua & Belum Dibaca)
+          // Filter Tabs
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 19.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             color: Colors.white,
             child: Row(
               children: [
@@ -82,18 +82,33 @@ class ChatListPage extends StatelessWidget {
             ),
           ),
 
-          // List Chat View
+          // Chat List View
           Expanded(
             child: ListView.builder(
               itemCount: chats.length,
               itemBuilder: (context, index) {
                 final chat = chats[index];
                 return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   leading: CircleAvatar(
                     radius: 25,
-                    backgroundImage: AssetImage(chat['avatar']!),
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: const Color(0xFFEDECF2),
+                    child: ClipOval(
+                      child: Image.asset(
+                        chat['avatar']!,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.store,
+                            color: Color(0xFF4C53A5),
+                            size: 28,
+                          );
+                        },
+                      ),
+                    ),
                   ),
                   title: Text(
                     chat['name']!,
@@ -118,7 +133,7 @@ class ChatListPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      if (index == 0) // Badge merah pesan belum dibaca
+                      if (index == 0)
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: const BoxDecoration(
@@ -139,7 +154,7 @@ class ChatListPage extends StatelessWidget {
                   onTap: () {
                     Navigator.pushNamed(
                       context,
-                      "ChatDetail",
+                      "/chat_detail",
                       arguments: chat['name'],
                     );
                   },

@@ -5,9 +5,14 @@ import 'pages/detail_chat.dart';
 import 'pages/login_pages.dart';
 import 'pages/account_pages.dart';
 import 'pages/cart_page.dart';
+import 'providers/app_state_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const AppStateScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,31 +20,71 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.auth;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'EcoGlobal',
+      title: 'EcoGlobal E-Commerce',
       theme: ThemeData(
+        useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4C53A5),
+          primary: const Color(0xFF4C53A5),
+          secondary: const Color(0xFF653993),
+        ),
       ),
-      initialRoute: "/",
+      // Auth Guard at Startup
+      initialRoute: auth.isAuthenticated ? "/dashboard" : "/login",
       routes: {
-        "/": (context) => const HomePage(),
-        "homePage": (context) => const HomePage(),
-        "loginPage": (context) => const LoginPages(),
-        "accountPage": (context) => const AccountPage(),
+        "/": (context) => auth.isAuthenticated
+            ? const HomePage()
+            : const LoginPages(),
+        "/login": (context) => const LoginPages(),
+        "/dashboard": (context) => const HomePage(),
+        "/homePage": (context) => const HomePage(),
+        "/cart": (context) => const CartPage(),
         "cartPage": (context) => const CartPage(),
+        "/account": (context) => const AccountPage(),
+        "accountPage": (context) => const AccountPage(),
+        "/list_chat": (context) => const ChatListPage(),
         "ListChat": (context) => const ChatListPage(),
+        "/chat_detail": (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as String?;
+          return ChatScreen(contactName: args ?? 'Nike Official');
+        },
         "ChatDetail": (context) {
           final args = ModalRoute.of(context)?.settings.arguments as String?;
           return ChatScreen(contactName: args ?? 'Nike Official');
         },
+        "/item_detail": (context) => Scaffold(
+              appBar: AppBar(
+                title: const Text("Detail Produk",
+                    style: TextStyle(color: Colors.white)),
+                backgroundColor: const Color(0xFF4C53A5),
+                iconTheme: const IconThemeData(color: Colors.white),
+              ),
+              body: const Center(
+                child: Text(
+                  "Halaman Detail Produk",
+                  style: TextStyle(fontSize: 18, color: Color(0xFF4C53A5)),
+                ),
+              ),
+            ),
         "itemsPage": (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text("Product Details"),
-            backgroundColor: const Color(0xFF4C53A5),
-          ),
-          body: const Center(child: Text("Halaman Detail Produk")),
-        ),
+              appBar: AppBar(
+                title: const Text("Detail Produk",
+                    style: TextStyle(color: Colors.white)),
+                backgroundColor: const Color(0xFF4C53A5),
+                iconTheme: const IconThemeData(color: Colors.white),
+              ),
+              body: const Center(
+                child: Text(
+                  "Halaman Detail Produk",
+                  style: TextStyle(fontSize: 18, color: Color(0xFF4C53A5)),
+                ),
+              ),
+            ),
       },
     );
   }

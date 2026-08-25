@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../providers/app_state_provider.dart';
+import '../widgets/custom_text_field.dart';
 
 class LoginPages extends StatefulWidget {
   const LoginPages({super.key});
@@ -20,10 +22,30 @@ class _LoginPagesState extends State<LoginPages> {
     super.dispose();
   }
 
+  void _handleLogin() {
+    if (_formKey.currentState!.validate()) {
+      final authProvider = context.auth;
+      authProvider.login(_emailController.text.trim(), _passwordController.text);
+
+      // Clear navigation stack and redirect to dashboard cleanly
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/dashboard',
+        (route) => false,
+      );
+    }
+  }
+
   // Header Widget
   Widget _buildHeader() {
     return const Column(
       children: [
+        Icon(
+          Icons.eco_rounded,
+          size: 65,
+          color: Color(0xFF653993),
+        ),
+        SizedBox(height: 16),
         Text(
           'Welcome Back!',
           style: TextStyle(
@@ -32,9 +54,9 @@ class _LoginPagesState extends State<LoginPages> {
             color: Color(0xFF1E1E1E),
           ),
         ),
-        SizedBox(height: 12),
+        SizedBox(height: 8),
         Text(
-          'Please sign in to continue',
+          'Please sign in to continue shopping',
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF8E8E93),
@@ -44,36 +66,18 @@ class _LoginPagesState extends State<LoginPages> {
     );
   }
 
-  // Input Email Field
+  // Email Field using CustomTextField
   Widget _buildEmailField() {
-    return TextFormField(
+    return CustomTextField(
       controller: _emailController,
-      style: const TextStyle(color: Colors.black87, fontSize: 16),
-      decoration: InputDecoration(
-        hintText: 'Email',
-        hintStyle: const TextStyle(color: Color(0xFF333333), fontSize: 16),
-        prefixIcon: const Icon(Icons.email, color: Color(0xFF333333)),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF653993), width: 1.5),
-        ),
-      ),
+      hintText: 'Email',
+      prefixIcon: Icons.email_outlined,
+      keyboardType: TextInputType.emailAddress,
       validator: (value) {
-        if (value == null || value.isEmpty) {
+        if (value == null || value.trim().isEmpty) {
           return 'Email tidak boleh kosong';
         }
-        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
           return 'Format email tidak valid';
         }
         return null;
@@ -81,45 +85,19 @@ class _LoginPagesState extends State<LoginPages> {
     );
   }
 
-  // Input Password Field
+  // Password Field using CustomTextField
   Widget _buildPasswordField() {
-    return TextFormField(
+    return CustomTextField(
       controller: _passwordController,
+      hintText: 'Password',
+      prefixIcon: Icons.lock_outline,
+      isPassword: true,
       obscureText: _obscurePassword,
-      style: const TextStyle(color: Colors.black87, fontSize: 16),
-      decoration: InputDecoration(
-        hintText: 'Password',
-        hintStyle: const TextStyle(color: Color(0xFF333333), fontSize: 16),
-        prefixIcon: const Icon(Icons.lock, color: Color(0xFF333333)),
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscurePassword
-                ? Icons.visibility_off_outlined
-                : Icons.visibility_outlined,
-            color: const Color(0xFF333333),
-          ),
-          onPressed: () {
-            setState(() {
-              _obscurePassword = !_obscurePassword;
-            });
-          },
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF653993), width: 1.5),
-        ),
-      ),
+      onToggleVisibility: () {
+        setState(() {
+          _obscurePassword = !_obscurePassword;
+        });
+      },
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Password tidak boleh kosong';
@@ -132,60 +110,59 @@ class _LoginPagesState extends State<LoginPages> {
     );
   }
 
-  // ElevateButton Login
-  Widget _buildLoginButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          Navigator.pushReplacementNamed(context, 'accountPage');
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF653993),
-        minimumSize: const Size(140, 48),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+  // Elevated Login Button
+  Widget _buildLoginButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _handleLogin,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF653993),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
         ),
-        elevation: 0,
-      ),
-      child: const Text(
-        'Login',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+        child: const Text(
+          'Login',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
   // Forgot Password Link
-  Widget _buildForgotPasswordLink(BuildContext context) {
+  Widget _buildForgotPasswordLink() {
     return TextButton(
       onPressed: () {
-        // Handled when clicked
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fitur Reset Password akan dikirimkan ke email Anda.'),
+            backgroundColor: Color(0xFF653993),
+          ),
+        );
       },
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.zero,
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
       child: const Text(
         'Forgot Password?',
         style: TextStyle(
           color: Color(0xFF653993),
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 
-  // TextButton Sign Up Link
-  Widget _buildSignupLink(BuildContext context) {
+  // Signup Link
+  Widget _buildSignupLink() {
     return TextButton(
       onPressed: () {
-        Navigator.pushNamed(context, '/');
+        _handleLogin(); // Auto login for seamless experience or redirect
       },
       child: const Text(
         "Don't have an account? Sign Up",
@@ -202,26 +179,28 @@ class _LoginPagesState extends State<LoginPages> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF6FD),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 36),
-                _buildEmailField(),
-                const SizedBox(height: 16),
-                _buildPasswordField(),
-                const SizedBox(height: 28),
-                _buildLoginButton(context),
-                const SizedBox(height: 20),
-                _buildForgotPasswordLink(context),
-                const SizedBox(height: 24),
-                _buildSignupLink(context),
-              ],
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 36),
+                  _buildEmailField(),
+                  const SizedBox(height: 16),
+                  _buildPasswordField(),
+                  const SizedBox(height: 28),
+                  _buildLoginButton(),
+                  const SizedBox(height: 16),
+                  _buildForgotPasswordLink(),
+                  const SizedBox(height: 16),
+                  _buildSignupLink(),
+                ],
+              ),
             ),
           ),
         ),
