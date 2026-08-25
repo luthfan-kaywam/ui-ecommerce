@@ -331,25 +331,46 @@ class _HomePageContentState extends State<HomePageContent> {
                           });
                         },
                       )
-                    : GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.65,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                        itemCount: filtered.length,
-                        itemBuilder: (context, index) {
-                          return ProductCard(
-                            product: filtered[index],
-                            onCartTap: widget.onNavigateToCart,
-                          );
-                        },
-                      ),
+                    : filtered.length <= 2
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: Wrap(
+                                spacing: 12,
+                                runSpacing: 12,
+                                children: filtered.map((product) {
+                                  return SizedBox(
+                                    width: 200,
+                                    height: 295,
+                                    child: ProductCard(
+                                      product: product,
+                                      onCartTap: widget.onNavigateToCart,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          )
+                        : GridView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 220,
+                              childAspectRatio: 0.68,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                            ),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              return ProductCard(
+                                product: filtered[index],
+                                onCartTap: widget.onNavigateToCart,
+                              );
+                            },
+                          ),
               ],
             ),
           ),

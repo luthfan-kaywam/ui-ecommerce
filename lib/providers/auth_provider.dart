@@ -22,6 +22,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateProfile({required String name, required String email}) {
+    if (name.trim().isNotEmpty) {
+      _userName = name.trim();
+    }
+    if (email.trim().isNotEmpty) {
+      _userEmail = email.trim();
+    }
+    notifyListeners();
+  }
+
   void logout() {
     _isAuthenticated = false;
     _userEmail = '';
