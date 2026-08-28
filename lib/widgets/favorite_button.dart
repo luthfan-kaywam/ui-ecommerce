@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class FavoriteButton extends StatefulWidget {
   final bool initialIsFavorite;
@@ -9,7 +11,7 @@ class FavoriteButton extends StatefulWidget {
     super.key,
     this.initialIsFavorite = false,
     this.onChanged,
-    this.size = 22.0,
+    this.size = 18.0,
   });
 
   @override
@@ -19,8 +21,8 @@ class FavoriteButton extends StatefulWidget {
 class _FavoriteButtonState extends State<FavoriteButton>
     with SingleTickerProviderStateMixin {
   late bool _isFavorite;
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -34,12 +36,12 @@ class _FavoriteButtonState extends State<FavoriteButton>
 
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.35)
+        tween: Tween<double>(begin: 1.0, end: 1.4)
             .chain(CurveTween(curve: Curves.easeOut)),
         weight: 50,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.35, end: 1.0)
+        tween: Tween<double>(begin: 1.4, end: 1.0)
             .chain(CurveTween(curve: Curves.bounceOut)),
         weight: 50,
       ),
@@ -53,6 +55,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
   }
 
   void _toggleFavorite() {
+    HapticFeedback.lightImpact();
     setState(() {
       _isFavorite = !_isFavorite;
     });
@@ -66,24 +69,53 @@ class _FavoriteButtonState extends State<FavoriteButton>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _toggleFavorite,
-      child: AnimatedScale(
-        scale: 1.0,
-        duration: const Duration(milliseconds: 150),
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            padding: const EdgeInsets.all(6),
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
-              color: _isFavorite
-                  ? Colors.red.shade50
-                  : Colors.grey.shade100.withValues(alpha: 0.8),
               shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.12),
+              border: Border.all(
+                color: _isFavorite
+                    ? const Color(0xFFF472B6).withValues(alpha: 0.6)
+                    : Colors.white.withValues(alpha: 0.2),
+                width: 1.2,
+              ),
+              boxShadow: _isFavorite
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFFF472B6).withValues(alpha: 0.4),
+                        blurRadius: 10,
+                      ),
+                    ]
+                  : null,
             ),
-            child: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.redAccent : Colors.grey.shade400,
-              size: widget.size,
+            child: Center(
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) {
+                    return ScaleTransition(
+                      scale: Tween<double>(begin: 0.5, end: 1.0).animate(
+                        CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                      ),
+                      child: child,
+                    );
+                  },
+                  child: Icon(
+                    _isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    key: ValueKey<bool>(_isFavorite),
+                    color: _isFavorite ? const Color(0xFFF472B6) : Colors.white70,
+                    size: widget.size,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

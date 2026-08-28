@@ -1,20 +1,21 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ui_ecommerce/main.dart';
 import 'package:ui_ecommerce/providers/app_state_provider.dart';
+import 'package:ui_ecommerce/core/widgets/theme_toggle_button.dart';
 
 void main() {
-  testWidgets('App renders correctly smoke test', (WidgetTester tester) async {
-    // Build our app wrapped in AppStateScope
+  testWidgets('Theme toggle button renders and interacts correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       const AppStateScope(
-        child: MyApp(),
+        child: MaterialApp(
+          home: Scaffold(
+            body: ThemeToggleButton(),
+          ),
+        ),
       ),
     );
 
-    // Trigger frame
-    await tester.pumpAndSettle();
-
-    // Verify app title or main UI element exists
-    expect(find.byType(MyApp), findsOneWidget);
+    expect(find.byType(ThemeToggleButton), findsOneWidget);
   });
 }

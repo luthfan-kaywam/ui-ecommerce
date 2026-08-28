@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'auth_provider.dart';
 import 'cart_provider.dart';
+import 'theme_provider.dart';
 
 class AppStateScope extends StatefulWidget {
   final Widget child;
@@ -13,18 +14,21 @@ class AppStateScope extends StatefulWidget {
 class _AppStateScopeState extends State<AppStateScope> {
   late final AuthProvider authProvider;
   late final CartProvider cartProvider;
+  late final ThemeProvider themeProvider;
 
   @override
   void initState() {
     super.initState();
     authProvider = AuthProvider();
     cartProvider = CartProvider();
+    themeProvider = ThemeProvider();
   }
 
   @override
   void dispose() {
     authProvider.dispose();
     cartProvider.dispose();
+    themeProvider.dispose();
     super.dispose();
   }
 
@@ -33,8 +37,9 @@ class _AppStateScopeState extends State<AppStateScope> {
     return AppStateProvider(
       authProvider: authProvider,
       cartProvider: cartProvider,
+      themeProvider: themeProvider,
       child: ListenableBuilder(
-        listenable: Listenable.merge([authProvider, cartProvider]),
+        listenable: Listenable.merge([authProvider, cartProvider, themeProvider]),
         builder: (context, child) {
           return widget.child;
         },
@@ -46,11 +51,13 @@ class _AppStateScopeState extends State<AppStateScope> {
 class AppStateProvider extends InheritedWidget {
   final AuthProvider authProvider;
   final CartProvider cartProvider;
+  final ThemeProvider themeProvider;
 
   const AppStateProvider({
     super.key,
     required this.authProvider,
     required this.cartProvider,
+    required this.themeProvider,
     required super.child,
   });
 
@@ -64,11 +71,15 @@ class AppStateProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(AppStateProvider oldWidget) {
     return authProvider != oldWidget.authProvider ||
-        cartProvider != oldWidget.cartProvider;
+        cartProvider != oldWidget.cartProvider ||
+        themeProvider != oldWidget.themeProvider;
   }
 }
 
 extension AppStateContextExtension on BuildContext {
   AuthProvider get auth => AppStateProvider.of(this).authProvider;
   CartProvider get cart => AppStateProvider.of(this).cartProvider;
+  ThemeProvider get themeProvider => AppStateProvider.of(this).themeProvider;
+  bool get isDarkMode => themeProvider.isDarkMode;
 }
+

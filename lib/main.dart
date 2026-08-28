@@ -5,86 +5,148 @@ import 'pages/detail_chat.dart';
 import 'pages/login_pages.dart';
 import 'pages/account_pages.dart';
 import 'pages/cart_page.dart';
+import 'pages/onboarding_screen.dart';
 import 'providers/app_state_provider.dart';
+import 'providers/theme_provider.dart';
+import 'core/theme/app_colors.dart';
+import 'core/theme/app_text_styles.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   runApp(
     const AppStateScope(
-      child: MyApp(),
+      child: _ThemeWrapper(),
     ),
   );
 }
 
+// ── _ThemeWrapper: listens to ThemeProvider directly so MaterialApp
+//    always re-evaluates themeMode on every toggleTheme() call. ─────────────
+class _ThemeWrapper extends StatelessWidget {
+  const _ThemeWrapper();
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = context.themeProvider;
+
+    return ListenableBuilder(
+      listenable: themeProvider,
+      builder: (context, _) {
+        return MyApp(themeProvider: themeProvider);
+      },
+    );
+  }
+}
+
+// ── MyApp ─────────────────────────────────────────────────────────────────
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ThemeProvider? themeProvider;
+
+  const MyApp({super.key, this.themeProvider});
+
+  // Global Page Transition: Fade + Slide (Offset(0.04, 0) -> Offset.zero)
+  static Route<dynamic> _buildAnimatedRoute(
+    Widget page,
+    RouteSettings settings,
+  ) {
+    return PageRouteBuilder(
+      settings: settings,
+      transitionDuration: const Duration(milliseconds: 320),
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.04, 0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
+            ),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.auth;
+    final tp = themeProvider ?? context.themeProvider;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'EcoGlobal E-Commerce',
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: Colors.white,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4C53A5),
-          primary: const Color(0xFF4C53A5),
-          secondary: const Color(0xFF653993),
-        ),
-      ),
-      // Auth Guard at Startup
-      initialRoute: auth.isAuthenticated ? "/dashboard" : "/login",
-      routes: {
-        "/": (context) => auth.isAuthenticated
-            ? const HomePage()
-            : const LoginPages(),
-        "/login": (context) => const LoginPages(),
-        "/dashboard": (context) => const HomePage(),
-        "/homePage": (context) => const HomePage(),
-        "/cart": (context) => const CartPage(),
-        "cartPage": (context) => const CartPage(),
-        "/account": (context) => const AccountPage(),
-        "accountPage": (context) => const AccountPage(),
-        "/list_chat": (context) => const ChatListPage(),
-        "ListChat": (context) => const ChatListPage(),
-        "/chat_detail": (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as String?;
-          return ChatScreen(contactName: args ?? 'Nike Official');
-        },
-        "ChatDetail": (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as String?;
-          return ChatScreen(contactName: args ?? 'Nike Official');
-        },
-        "/item_detail": (context) => Scaffold(
+      title: 'QiluthMart',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: tp.themeMode,
+      // Auth Guard & Entry Flow at Startup: Onboarding -> Login -> Dashboard
+      initialRoute: auth.isAuthenticated ? "/dashboard" : "/onboarding",
+      onGenerateRoute: (settings) {
+        Widget page;
+        switch (settings.name) {
+          case "/":
+            page = auth.isAuthenticated
+                ? const HomePage()
+                : const OnboardingScreen();
+            break;
+          case "/onboarding":
+            page = const OnboardingScreen();
+            break;
+          case "/login":
+            page = const LoginPages();
+            break;
+          case "/dashboard":
+          case "/homePage":
+            page = const HomePage();
+            break;
+          case "/cart":
+          case "cartPage":
+            page = const CartPage();
+            break;
+          case "/account":
+          case "accountPage":
+            page = const AccountPage();
+            break;
+          case "/list_chat":
+          case "ListChat":
+            page = const ChatListPage();
+            break;
+          case "/chat_detail":
+          case "ChatDetail":
+            final contactName = settings.arguments as String? ?? 'Nike Official';
+            page = ChatScreen(contactName: contactName);
+            break;
+          case "/item_detail":
+          case "itemsPage":
+          default:
+            page = Scaffold(
+              backgroundColor: AppColors.background,
               appBar: AppBar(
-                title: const Text("Detail Produk",
-                    style: TextStyle(color: Colors.white)),
-                backgroundColor: const Color(0xFF4C53A5),
+                title: Text(
+                  "Detail Produk",
+                  style: AppTextStyles.display(16, w: FontWeight.w700),
+                ),
+                backgroundColor: AppColors.surface,
                 iconTheme: const IconThemeData(color: Colors.white),
               ),
-              body: const Center(
+              body: Center(
                 child: Text(
                   "Halaman Detail Produk",
-                  style: TextStyle(fontSize: 18, color: Color(0xFF4C53A5)),
+                  style: AppTextStyles.display(18, w: FontWeight.w700).copyWith(
+                    color: AppColors.accent,
+                  ),
                 ),
               ),
-            ),
-        "itemsPage": (context) => Scaffold(
-              appBar: AppBar(
-                title: const Text("Detail Produk",
-                    style: TextStyle(color: Colors.white)),
-                backgroundColor: const Color(0xFF4C53A5),
-                iconTheme: const IconThemeData(color: Colors.white),
-              ),
-              body: const Center(
-                child: Text(
-                  "Halaman Detail Produk",
-                  style: TextStyle(fontSize: 18, color: Color(0xFF4C53A5)),
-                ),
-              ),
-            ),
+            );
+            break;
+        }
+
+        return _buildAnimatedRoute(page, settings);
       },
     );
   }

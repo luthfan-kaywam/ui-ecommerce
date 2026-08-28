@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>QiluthMart menggunakan kamera untuk fitur pencarian visual produk.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>QiluthMart membutuhkan akses galeri untuk memilih foto produk.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>QiluthMart membutuhkan akses untuk menyimpan foto ke galeri.</string>
 </dict>
 </plist>

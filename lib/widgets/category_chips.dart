@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../core/theme/app_theme.dart';
 
 class CategoryChips extends StatelessWidget {
   final List<String> categories;
@@ -16,33 +18,56 @@ class CategoryChips extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
         children: categories.map((category) {
-          final isSelected = selectedCategory.toLowerCase() == category.toLowerCase();
+          final isSelected =
+              selectedCategory.toLowerCase() == category.toLowerCase();
+
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
-              label: Text(
-                category,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : const Color(0xFF4C53A5),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              selected: isSelected,
-              onSelected: (_) => onCategorySelected(category),
-              selectedColor: const Color(0xFF4C53A5),
-              backgroundColor: Colors.white,
-              elevation: isSelected ? 3 : 1,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
+            padding: const EdgeInsets.only(right: 10),
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onCategorySelected(category);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  gradient: isSelected ? AppTheme.primaryGradient : null,
                   color: isSelected
-                      ? const Color(0xFF4C53A5)
-                      : Colors.grey.shade300,
+                      ? null
+                      : AppTheme.surface.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusChip),
+                  border: Border.all(
+                    color: isSelected
+                        ? Colors.transparent
+                        : const Color(0xFF818CF8).withValues(alpha: 0.20),
+                    width: 1.0,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF4F46E5).withValues(alpha: 0.4),
+                            blurRadius: 14,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppTheme.textSecondary,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ),
             ),

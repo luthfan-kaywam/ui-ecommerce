@@ -1,27 +1,65 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../providers/app_state_provider.dart';
+import '../core/theme/app_theme.dart';
+import '../core/widgets/gradient_text.dart';
 
 class CartAppBar extends StatelessWidget {
   const CartAppBar({super.key});
 
+  Widget _buildFrostedCircleButton({
+    required Widget icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.08),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.15),
+                width: 1.0,
+              ),
+            ),
+            child: Center(child: icon),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.15),
-            spreadRadius: 2,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+        color: AppTheme.background.withValues(alpha: 0.85),
+        border: Border(
+          bottom: BorderSide(
+            color: const Color(0xFF818CF8).withValues(alpha: 0.15),
+            width: 1.0,
           ),
-        ],
+        ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       child: Row(
         children: [
-          InkWell(
+          // Back Button
+          _buildFrostedCircleButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 18,
+              color: AppTheme.textPrimary,
+            ),
             onTap: () {
               if (Navigator.canPop(context)) {
                 Navigator.pop(context);
@@ -29,55 +67,85 @@ class CartAppBar extends StatelessWidget {
                 Navigator.pushReplacementNamed(context, '/dashboard');
               }
             },
-            child: const Icon(
-              Icons.arrow_back,
-              size: 28,
-              color: Color(0xFF4C53A5),
-            ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(left: 15),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.shopping_cart_outlined,
-                  color: Color(0xFF4C53A5),
-                  size: 26,
+
+          const SizedBox(width: 14),
+
+          // "Cart" in Gradient Text
+          Row(
+            children: [
+              ShaderMask(
+                shaderCallback: (bounds) =>
+                    AppTheme.primaryGradient.createShader(bounds),
+                child: const Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 24,
+                  color: Colors.white,
                 ),
-                SizedBox(width: 8),
-                Text(
-                  'Cart',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4C53A5),
-                    letterSpacing: 0.5,
+              ),
+              const SizedBox(width: 8),
+              GradientText(
+                'Keranjang',
+                style: AppTheme.displayBold(
+                  fontSize: 22,
+                  letterSpacing: -0.3,
+                ),
+                gradient: AppTheme.primaryGradient,
+              ),
+            ],
+          ),
+
+          const Spacer(),
+
+          // 3-dot Menu as Frosted Glass Circle
+          PopupMenuButton<String>(
+            color: AppTheme.surface2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: const Color(0xFF818CF8).withValues(alpha: 0.2),
+              ),
+            ),
+            icon: ClipOval(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.more_vert_rounded,
+                      size: 20,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          PopupMenuButton<String>(
-            icon: const Icon(
-              Icons.more_vert,
-              size: 28,
-              color: Color(0xFF4C53A5),
+              ),
             ),
             onSelected: (value) {
               if (value == 'Clear Cart') {
                 context.cart.clearCart();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Keranjang telah dikosongkan'),
-                    duration: Duration(seconds: 1),
+                  SnackBar(
+                    content: const Text('Keranjang telah dikosongkan'),
+                    backgroundColor: AppTheme.surface2,
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Menu "$value" dipilih'),
-                    duration: const Duration(seconds: 1),
+                    backgroundColor: AppTheme.surface2,
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
               }
@@ -87,9 +155,10 @@ class CartAppBar extends StatelessWidget {
                 value: 'Clear Cart',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_outline, color: Colors.red),
+                    Icon(Icons.delete_outline_rounded, color: AppTheme.error),
                     SizedBox(width: 10),
-                    Text('Clear Cart'),
+                    Text('Kosongkan Keranjang',
+                        style: TextStyle(color: AppTheme.error)),
                   ],
                 ),
               ),
@@ -97,9 +166,10 @@ class CartAppBar extends StatelessWidget {
                 value: 'Share',
                 child: Row(
                   children: [
-                    Icon(Icons.share, color: Color(0xFF4C53A5)),
+                    Icon(Icons.share_rounded, color: AppTheme.accentGlow),
                     SizedBox(width: 10),
-                    Text('Share Cart'),
+                    Text('Bagikan Keranjang',
+                        style: TextStyle(color: AppTheme.textPrimary)),
                   ],
                 ),
               ),
